@@ -9,7 +9,10 @@ class ItemAdmin(admin.ModelAdmin):
 
     """Item Admin Definition"""
 
-    pass
+    list_display = ("name", "create", "update", "used_by")
+
+    def used_by(self, obj):
+        return obj.room_set.count()
 
 
 @admin.register(models.Room)
@@ -56,6 +59,7 @@ class RoomAdmin(admin.ModelAdmin):
         "check_out",
         "instant_book",
         "count_amenities",  # 2 manytomanyfield 는 list_display에 표시할수 없으므로 함수로 만들어 표시한다.
+        "count_photos",
     )
 
     ordering = ("name", "price")
@@ -79,7 +83,7 @@ class RoomAdmin(admin.ModelAdmin):
         "house_rules",
     )
 
-    def count_amenities(self, obj):  # 3 첫번째인자 : 현 클래스 자체 두번째 인자 : 표시될 현제 row
+    def count_amenities(self, obj):  # 노트 #7 볼것.  3 첫번째인자 : 현 클래스 자체 두번째 인자 : 표시될 현제 row
         # print(obj)  # 집입니다요
         # print(obj.amenities)  # rooms.Amenity.None
         # print(obj.amenities.all())  # <QuerySet [<Amenity: Washer>]>
@@ -87,6 +91,10 @@ class RoomAdmin(admin.ModelAdmin):
         return obj.amenities.count()
 
     count_amenities.short_description = "시설들!!"
+
+    def count_photos(self, obj):  # Room model에 photo가 없다!
+        # print(obj.photo_set.count())  # 노트 #7 볼것.. Django ORM!!!!
+        return obj.photo_set.count()
 
 
 @admin.register(models.Photo)
