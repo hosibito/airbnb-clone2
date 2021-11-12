@@ -15,4 +15,8 @@ class ConversationAdmin(admin.ModelAdmin):
 
     """Conversation Admin Definition"""
 
-    pass
+    list_display = (
+        "__str__",
+        "count_participants",
+        "count_messages",
+    )

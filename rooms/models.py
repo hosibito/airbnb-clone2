@@ -110,6 +110,16 @@ class Room(core_models.TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def total_rating(self):  # 8.0 참조
+        all_reviews = self.review_set.all()
+        all_rating = 0
+        if len(all_reviews) > 0:
+            for review in all_reviews:
+                # print(review.rating_average())
+                all_rating += review.rating_average()  # reviews/model 에 있으므로 사용가능.
+            return round(all_rating / len(all_reviews), 2)
+        return 0
+
 
 """  노트 4.1 참조
     https://github.com/SmileyChris/django-countries
@@ -142,4 +152,11 @@ class Room(core_models.TimeStampedModel):
 
     https://nomadcoders.co/airbnb-clone/lectures/914 
 
+"""
+
+""" 8.0
+    review 에 Room 이 연결되어 있으므로 self.review_set.all() 으로 정보를 가져올수 있다.
+    룸에 딸린 리뷰가 여러개일것이므로 for 문을 돌린다.
+    각각의 리뷰안에 평균 점수를 내는 함수 rating_average() 사용
+    점수를 가져와서 전부 더한후 전체 리뷰갯수로나눠준다.
 """
