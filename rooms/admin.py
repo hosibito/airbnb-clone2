@@ -1,4 +1,7 @@
 from django.contrib import admin
+
+from django.utils.html import mark_safe
+
 from . import models
 
 # Register your models here.
@@ -13,6 +16,11 @@ class ItemAdmin(admin.ModelAdmin):
 
     def used_by(self, obj):
         return obj.room_set.count()
+
+
+class PhotoInline(admin.TabularInline):  # 노트 8.6 -2 참조 (어드민 내부에 다른 어드민을 추가한다.)
+
+    model = models.Photo
 
 
 @admin.register(models.Room)
@@ -76,6 +84,10 @@ class RoomAdmin(admin.ModelAdmin):
         "country",
     )
 
+    raw_id_fields = ("host",)  # 노트 8.6 참조 ( 외부검색해서 선택이 되도록한다. )
+
+    inlines = (PhotoInline,)  # 노트 8.6 -2 참조
+
     search_fields = ("=city", "^host__username")  # 6.1
 
     filter_horizontal = (  # 6.2 참조
@@ -103,7 +115,21 @@ class PhotoAdmin(admin.ModelAdmin):
 
     """Photo Admin Definition"""
 
-    pass
+    list_display = ("__str__", "get_thumbnail")
+
+    def get_thumbnail(self, obj):  # 노트 8.5참조
+        # print(obj.file) # room_photos/3612017.jpeg
+        # print(dir(obj.file)) # 이것저것 많음..
+        # print(type(obj.file)) # <class 'django.db.models.fields.files.ImageFielsFile'>
+        # print(obj.file.path) # 파일 경로가 나옴
+        # print(obj.file.url) # url 경로가 나옴
+        # print(obj.file.height) # 사진의 높이
+        # print(obj.file.width) # 사진의 폭
+        # print(obj.file.size) # 사이즈
+
+        return mark_safe(f"<img height='70px' src='{obj.file.url}' />")
+
+    get_thumbnail.short_description = "썸네일"
 
 
 """   6.1

@@ -1,11 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from . import models
+from rooms.models import Room as room_model
+
+
+class RoomInline(admin.TabularInline):  # 8.6-2
+    model = room_model
+
+    filter_horizontal = (  # 2 참조 # 이렇게도 먹는다!!
+        "amenities",
+        "facilities",
+        "house_rules",
+    )
 
 
 @admin.register(models.User)
 class CustomUserAdmin(UserAdmin):
     """Custom User Admin"""
+
+    inlines = (RoomInline,)  # 8.6-2
 
     fieldsets = UserAdmin.fieldsets + (
         (
