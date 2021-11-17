@@ -111,6 +111,12 @@ class Room(core_models.TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):  # 노트 8.8 참조
+        # print(obj, change, form)
+        # print(self.city)
+        self.city = str.capitalize(self.city)  # 첫글자 대문자로
+        super().save(*args, **kwargs)
+
     def total_rating(self):  # 8.0 참조
         all_reviews = self.review_set.all()
         all_rating = 0
