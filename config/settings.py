@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -139,5 +140,13 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+# 커스텀 유저 사용
 AUTH_USER_MODEL = "users.User"
+
+# 미디어 저장 경로  / 노트 8 - 3 참조
+MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
+# 미디어 주소 / 노트 8 - 3 참조
+MEDIA_URL = "/media/"
+# 주소에 베이스주소/media  가 들어오면 MEDIA_ROOT 와 연결한다.
+# "/media/" 는 절대경로 주소 "media/"는 상대경로 주소

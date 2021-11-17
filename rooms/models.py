@@ -2,7 +2,8 @@ from django.db import models
 from django_countries.fields import CountryField
 
 from core import models as core_models
-from users import models as user_models
+
+# from users import models as user_models
 
 # Create your models here.
 
@@ -62,7 +63,7 @@ class Photo(core_models.TimeStampedModel):
     """Photo Model Definition"""
 
     caption = models.CharField(max_length=80)
-    file = models.ImageField(upload_to="room_photos")
+    file = models.ImageField(upload_to="room_photos")  # 8.3
     # room = models.ForeignKey(Room, on_delete=models.CASCADE) Room 정의가 밑에있어서 에러
     room = models.ForeignKey("Room", on_delete=models.CASCADE)  # 4.2 또는 하단설명 참조
 
@@ -137,7 +138,7 @@ class Room(core_models.TimeStampedModel):
     이렇게 만드는게 낫다. 협업시에도 유리하다.
 """
 
-""" 4.2 
+""" 4.2
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     Room 정의가 밑에있어서 에러 따라서
     room = models.ForeignKey("Room", on_delete=models.CASCADE)
@@ -145,12 +146,12 @@ class Room(core_models.TimeStampedModel):
 
 
     string를 이용하면 임포트도 필요없어 지는데..
-    
+
         from users import models as user_models
         host = models.ForeignKey(user_models.User, on_delete=models.CASCADE)        로 사용해야하나.
         host = models.ForeignKey("users.User", on_delete=models.CASCADE)        이렇게 사용가능... ( 앱이름.모델클래스명 )
 
-    https://nomadcoders.co/airbnb-clone/lectures/914 
+    https://nomadcoders.co/airbnb-clone/lectures/914
 
 """
 

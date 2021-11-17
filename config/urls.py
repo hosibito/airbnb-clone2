@@ -16,6 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
 ]
+
+
+if settings.DEBUG:  # 노트 8-3 참조
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+"""
+    static 파일들이 위치하는곳을 설정해 준다.
+    다만.. 그냥 쌩으로 설정해주면.. 서버에 설정할때 이부분을 일일히 신경써서 고쳐줘야 한다.
+    그래서 settings.DEBUG 가 True 일때만 이곳을 이용하게 설정된다.
+"""

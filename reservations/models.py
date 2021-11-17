@@ -32,7 +32,7 @@ class Reservation(core_models.TimeStampedModel):
     #     "rooms.Room", related_name="reservations", on_delete=models.CASCADE
     # )
 
-    def __str__(self):  #  5.2
+    def __str__(self):  # 5.2
         return f"{self.room} - {self.check_in}"
 
     def in_progress(self):
