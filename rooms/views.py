@@ -1,7 +1,5 @@
 from django.utils import timezone
-from django.views.generic import ListView
-from django.http import Http404
-from django.shortcuts import render
+from django.views.generic import ListView, DetailView
 
 from . import models
 
@@ -27,6 +25,17 @@ class HomeView(ListView):
         # print(dir(context["page_obj"]))
 
 
+class RoomDetail(DetailView):
+
+    """RoomDetail Definition"""
+
+    model = models.Room
+
+
+""" 12.2 함수형 detail view (404관련포함)
+from django.http import Http404
+from django.shortcuts import render
+
 def room_detail(request, pk):
     try:
         room = models.Room.objects.get(pk=pk)
@@ -34,6 +43,8 @@ def room_detail(request, pk):
     except models.Room.DoesNotExist:
         # return redirect(reverse("core:home")) # 12.2 참고
         raise Http404()
+
+"""
 
 
 """ 11 페이지1 100% 수동 참조
@@ -62,6 +73,7 @@ def all_rooms(request):
     )
 
 """
+
 
 """ 11 페이지2 함수형 참조
 from django.shortcuts import render, redirect
