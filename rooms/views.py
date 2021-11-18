@@ -1,25 +1,33 @@
-# from math import ceil
-from django.shortcuts import render, redirect
-from django.core.paginator import Paginator, EmptyPage
+from django.utils import timezone
+from django.views.generic import ListView
 
 from . import models
 
 
-def all_rooms(request):
-    page = request.GET.get("page", 1)
-    room_list = models.Room.objects.all()  # 장고 쿼리는 게으르다.. 실제로 정보를 조회할때 처리된다.
-    paginator = Paginator(room_list, 10, orphans=4)
+class HomeView(ListView):
 
-    try:
-        page_rooms = paginator.page(int(page))
-        return render(request, "rooms/home.html", {"page_rooms": page_rooms})
-    except EmptyPage:
-        return redirect("/")
-    except ValueError:
-        return redirect("/")
+    """HomeView Definition"""
+
+    model = models.Room
+    paginate_by = 10
+    paginate_orphans = 5
+    ordering = "-create"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        context["time_now"] = now
+
+        return context
+
+        # print(context)
+        # print(dir(context))
+        # print(dir(context["page_obj"]))
 
 
 """ 11 페이지1 100% 수동 참조
+from math import ceil
+
 def all_rooms(request):
     # page = int(request.GET.get("page", 1))  # 주소창에 페이지 번호를 안넣으면 에러
     page = request.GET.get("page", 1)  # 아예 아무것도 입력안할떄 1 ?page=  로 입력이 들어오면 "" 반환.
@@ -45,6 +53,8 @@ def all_rooms(request):
 """
 
 """ 11 페이지2 함수형 참조
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator, EmptyPage
 
 ### paginator의 구조를 파악하자
 def all_rooms(request):

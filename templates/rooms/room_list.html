@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+
+{% block page_name %}
+    Home
+{% endblock page_name %}
+
+{% block content %}
+    <h4>time now : {{time_now}}</h4>
+
+    {% for room in object_list  %}
+        <h1>{{room.name}} / ${{room.price}}</h1>
+    {% endfor %}
+  
+
+    <!--  페이지 관련 -->
+    <!-- page 1 of 5-->
+    <h5> Page {{page_obj.number}} of {{page_obj.paginator.num_pages}} </h5>
+
+    <!-- Previous Page 2 of 5 Next -->
+    <h5>
+        {% if page_obj.has_previous %}
+            <a href="?page={{page_obj.previous_page_number}}">Previous</a>
+        {% endif %}
+
+        Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+
+        {% if page_obj.has_next  %}
+            <a href="?page={{page_obj.next_page_number}}">Next</a>
+        {% endif %}
+    </h5>
+
+    <!-- 1 2 3 4 5 -->
+    {% for page in page_obj.paginator.page_range %}
+        <a href="?page={{page}}">{{page}}</a>
+    {% endfor %}
+
+    
+
+
+{% endblock content %}
