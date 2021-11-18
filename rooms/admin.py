@@ -109,6 +109,8 @@ class RoomAdmin(admin.ModelAdmin):
         # print(obj.photo_set.count())  # 노트 #7 볼것.. Django ORM!!!!
         return obj.photo_set.count()
 
+    count_photos.short_description = "Photo Count"
+
 
 @admin.register(models.Photo)
 class PhotoAdmin(admin.ModelAdmin):
@@ -136,7 +138,7 @@ class PhotoAdmin(admin.ModelAdmin):
     여러 검색방법이 있다. "^city",  "=city" 등등
     "host__username" self.host.username 를 검색헤서 사용한다.
 
-    상단 검색창을 만들어준다. 
+    상단 검색창을 만들어준다.
 """
 
 
