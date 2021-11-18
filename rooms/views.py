@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.views.generic import ListView
+from django.shortcuts import render
 
 from . import models
 
@@ -23,6 +24,11 @@ class HomeView(ListView):
         # print(context)
         # print(dir(context))
         # print(dir(context["page_obj"]))
+
+
+def room_detail(request, pk):
+    print(pk)
+    return render(request, "rooms/detail.html")
 
 
 """ 11 페이지1 100% 수동 참조
