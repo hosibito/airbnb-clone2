@@ -6,33 +6,69 @@
 
 {% block content %}
 
-    {% for room in potato  %}
-        <h1>{{room.name}} / ${{room.price}}</h1>
+    {% for room in page_rooms.object_list %}
+        <h1>{{ room.name }} / ${{ room.price }}</h1>
     {% endfor %}
 
-
     <!--  페이지 관련 -->
-        <!-- page 1 of 5-->
-        <h5> Page {{page}} of {{page_count}}</h5>
-        
-        <!-- Previous Page 2 of 5 Next -->
-        <h5>
-            {% if page is not 1 %}
-                <a href="?page={{page|add:-1}}">Previous</a>
-            {% endif %}
-        
-            Page {{page}} of {{page_count}}
-        
-            {% if not page == page_count  %}
-                <a href="?page={{page|add:1}}">Next</a>
-            {% endif %}
-        <h5>
+    <!-- page 1 of 5-->
+    <h5> Page {{page_rooms.number}} of {{page_rooms.paginator.num_pages}} </h5>
 
-        <!-- 1 2 3 4 5 -->
-        {% for page in page_range %}
-            <a href="?page={{page}}">{{page}}</a>
-        {% endfor %}
+    <!-- Previous Page 2 of 5 Next -->
+    <h5>
+        {% if page_rooms.has_previous %}
+            <a href="?page={{page_rooms.previous_page_number}}">Previous</a>
+        {% endif %}
+
+        Page {{page_rooms.number}} of {{page_rooms.paginator.num_pages}}
+
+        {% if page_rooms.has_next  %}
+            <a href="?page={{page_rooms.next_page_number}}">Next</a>
+        {% endif %}
+    </h5>
+
+    <!-- 1 2 3 4 5 -->
+    {% for page in page_rooms.paginator.page_range %}
+        <a href="?page={{page}}">{{page}}</a>
+    {% endfor %}
 
 
 
 {% endblock content %}
+
+
+
+
+
+
+<!-- ===============참고용 코드 보관 ======================== -->
+{% comment "note # 11 페이지1(100%수동)" %}  
+
+    {% for room in potato  %}
+    <h1>{{room.name}} / ${{room.price}}</h1>
+    {% endfor %}
+
+
+    <!--  페이지 관련 -->
+    <!-- page 1 of 5-->
+    <h5> Page {{page}} of {{page_count}}</h5>
+
+    <!-- Previous Page 2 of 5 Next -->
+    <h5>
+        {% if page is not 1 %}
+            <a href="?page={{page|add:-1}}">Previous</a>
+        {% endif %}
+
+        Page {{page}} of {{page_count}}
+
+        {% if not page == page_count  %}
+            <a href="?page={{page|add:1}}">Next</a>
+        {% endif %}
+    <h5>
+
+    <!-- 1 2 3 4 5 -->
+    {% for page in page_range %}
+        <a href="?page={{page}}">{{page}}</a>
+    {% endfor %}
+
+{% endcomment %}
