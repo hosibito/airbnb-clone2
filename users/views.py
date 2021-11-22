@@ -51,6 +51,27 @@ def log_out(request):
     return redirect(reverse("core:home"))
 
 
+class SignUpView(FormView):
+    template_name = "users/signup.html"
+    form_class = user_forms.SignUpForm
+    success_url = reverse_lazy("core:home")
+
+    initial = {  # 폼에 들어갈 기본 데이터를 미리 입력
+        "first_name": "Nicoas",
+        "last_name": "Serr",
+        "email": "itn@las.com",
+    }
+
+    def form_valid(self, form):
+        form.save()
+        email = form.cleaned_data.get("email")
+        password = form.cleaned_data.get("password")
+        user = authenticate(self.request, username=email, password=password)
+        if user is not None:
+            login(self.request, user)
+        return super().form_valid(form)
+
+
 """
 14.4 확인할것.
 """
