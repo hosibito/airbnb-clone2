@@ -7,6 +7,7 @@ from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
+from django.core.files.base import ContentFile
 
 from . import forms as user_forms
 from . import models as user_models
@@ -172,4 +173,100 @@ def github_callback(request):
             raise GithubException()
     except GithubException:
         # 에러메시지 포함시킬것
+        return redirect(reverse("users:login"))
+
+
+def kakao_login(request):
+    REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
+    REDIRECT_URI = "http://127.0.0.1:8000/users/login/kakao/callback"
+    return redirect(
+        f"https://kauth.kakao.com/oauth/authorize?client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}&response_type=code"
+    )
+
+
+class KakaoException(Exception):
+    pass
+
+
+def kakao_callback(request):
+    # print(request.GET)  # <QueryDict: {'code': ['61WpYAVoPFXBq...']}>
+    try:
+        code = request.GET.get("code")
+        REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
+        REDIRECT_URI = "http://127.0.0.1:8000/users/login/kakao/callback"
+        if code is not None:
+            token_request = requests.post(
+                "https://kauth.kakao.com/oauth/token",
+                data={
+                    "grant_type": "authorization_code",
+                    "client_id": REST_API_KEY,
+                    "redirect_uri": REDIRECT_URI,
+                    "code": code,
+                },
+            )
+            # token_request = requests.get(
+            #     f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}&code={code}"
+            # )
+            token_json = token_request.json()
+            # print(token_json)  # {'access_token': 'I6l9m....', .....
+            error = token_json.get("error", None)
+            if error is not None:
+                raise KakaoException()
+            else:
+                access_token = token_json.get("access_token")
+                api_request = requests.get(
+                    "https://kapi.kakao.com/v2/user/me",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                )
+                # print(api_request.json())
+                profile_json = api_request.json()
+                # print(profile_json)
+                id = profile_json.get("id")
+                if id is not None:
+                    email = profile_json.get("kakao_account").get("email", None)
+                    properties = profile_json.get("properties")
+                    nickname = properties.get("nickname")
+                    profile_image = properties.get("profile_image")
+
+                    if email is None:
+                        # 카카오에서 이메일정보를 못가져온다. 오류처리할것
+                        print("카카오에서 이메일정보를 못가져온다.")
+                        raise KakaoException()
+
+                    try:
+                        user = user_models.User.objects.get(email=email)
+                        # 이미 로그인해 있거나. 가입해있는유저
+                        if user.login_method != user_models.User.LOGING_KAKAO:
+                            # 다른방식으로 가입해 있는 유저
+                            raise GithubException()
+                    except user_models.User.DoesNotExist:
+                        # 새로 가입해야할 유저
+                        user = user_models.User.objects.create(
+                            username=email,
+                            first_name=nickname,
+                            bio="",
+                            email=email,
+                            email_verified=True,
+                            login_method=user_models.User.LOGING_KAKAO,
+                        )
+                        user.set_unusable_password()
+                        user.save()
+
+                        if profile_image is not None:
+                            photo_request = requests.get(profile_image)
+                            user.avatar.save(
+                                f"{nickname}-avatar", ContentFile(photo_request.content)
+                            )
+                            # 이미지 파일이면 그나름대로 처리하는데 시간이 걸린다. 그냥 더미데이터로 처리하기위해
+                            # 더미데이터로 DB에 직접 저장..
+                            # photo_request.content 로 의미없는 01로 구성된 데이터로 만든뒤
+                            # 그 데이터를  ContentFile()로 묶어서 파일로 만들어 저장한다.
+
+                    login(request, user)
+                    return redirect(reverse("core:home"))
+                else:
+                    raise GithubException()
+        else:
+            raise KakaoException()
+    except KakaoException:
         return redirect(reverse("users:login"))
