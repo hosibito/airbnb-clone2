@@ -1,3 +1,6 @@
+import os
+import requests
+
 from django.views import View
 from django.views.generic import FormView
 
@@ -87,6 +90,86 @@ def complete_verification(request, key):
     return redirect(reverse("core:home"))
 
 
-"""
-14.4 확인할것.
-"""
+def github_login(request):
+    client_id = os.environ.get("GH_ID")
+    redirect_uri = "http://127.0.0.1:8000/users/login/github/callback"
+    return redirect(
+        f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&scope=read:user"
+    )
+
+
+class GithubException(Exception):
+    pass
+
+
+def github_callback(request):
+    # print(request.GET)
+    try:
+        client_id = os.environ.get("GH_ID")
+        client_secret = os.environ.get("GH_SECRET")
+        code = request.GET.get("code", None)
+        if code is not None:
+            token_request = requests.post(
+                f"https://github.com/login/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}",
+                headers={"Accept": "application/json"},
+            )
+            # print(token_request.json())
+            # {'access_token': 'gho_WXdmTQ8N...', 'token_type': 'bearer', 'scope': 'read:user'}
+            token_json = token_request.json()
+            error = token_json.get("error", None)
+
+            if error is not None:
+                print("깃허브에서 토큰을 받아오면서 오류가 생겼다")
+                raise GithubException()
+            else:
+                access_token = token_json.get("access_token")
+                api_request = requests.get(
+                    "https://api.github.com/user",
+                    headers={"Authorization": f"token {access_token}"},
+                )
+                # print(api_request.json())
+                # 17 LOG IN WITH GITHUB access_token 으로 user를 받아온다. 확인
+                profile_json = api_request.json()  # 유저를 깃허브에서 받아오는데 성공!
+                username = profile_json.get("login", None)
+                if username is not None:
+                    name = profile_json.get("name", None)
+                    email = profile_json.get("email", None)
+
+                    if email is None:
+                        # 깃허브에서 이메일정보를 못가져온다. 오류처리할것
+                        print("깃허브에서 이메일정보를 못가져온다.")
+                        raise GithubException()
+
+                    bio = profile_json.get("bio", None)
+                    if bio is None:
+                        bio = ""
+
+                    try:
+                        user = user_models.User.objects.get(email=email)
+                        # 이미 로그인해 있거나. 가입해있는유저
+                        if user.login_method != user_models.User.LOGIN_GITHUB:
+                            # 다른방식으로 가입해 있는 유저
+                            print("깃허브가 아닌 다른방식으로 가입해 있는 유저")
+                            raise GithubException()
+                    except user_models.User.DoesNotExist:
+                        # 새로 가입해야할 유저
+                        user = user_models.User.objects.create(
+                            username=email,
+                            first_name=name,
+                            bio=bio,
+                            email=email,
+                            email_verified=True,
+                            login_method=user_models.User.LOGIN_GITHUB,
+                        )
+                        user.set_unusable_password()  # 깃허브로 가입하는 유저이므로 패스워드가 필요없다
+                        user.save()
+
+                    login(request, user)
+                    return redirect(reverse("core:home"))
+                else:
+                    raise GithubException()
+        else:
+            raise GithubException()
+    except GithubException:
+        # 에러메시지 포함시킬것
+        return redirect(reverse("users:login"))
