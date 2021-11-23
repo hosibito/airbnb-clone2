@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
 
 from . import forms as user_forms
+from . import models as user_models
 
 
 class LoginView(FormView):
@@ -59,7 +60,7 @@ class SignUpView(FormView):
     initial = {  # 폼에 들어갈 기본 데이터를 미리 입력
         "first_name": "Nicoas",
         "last_name": "Serr",
-        "email": "itn@las.com",
+        "email": "hosibito@naver.com",
     }
 
     def form_valid(self, form):
@@ -69,7 +70,21 @@ class SignUpView(FormView):
         user = authenticate(self.request, username=email, password=password)
         if user is not None:
             login(self.request, user)
+        user.verify_email()  # 모델안의 이메일 보내는 함수 호출
         return super().form_valid(form)
+
+
+def complete_verification(request, key):
+    try:
+        user = user_models.User.objects.get(email_secret=key)
+        user.email_verified = True
+        user.email_secret = ""
+        user.save()
+        # to do: add succes message
+    except user_models.User.DoesNotExist:
+        # to do: add error message
+        pass
+    return redirect(reverse("core:home"))
 
 
 """
