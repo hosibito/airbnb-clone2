@@ -1,0 +1,22 @@
+{
+  "name": "airbnb-cline",
+  "version": "1.0.0",
+  "description": "에어비앤비 클론 연습 2021-05-27",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hosibito/airbnb-clone.git"
+  },
+  "scripts": {
+    "css": "gulp"
+  },
+  "homepage": "https://github.com/hosibito/airbnb-clone#readme",
+  "devDependencies": {
+    "autoprefixer": "^9.7.0",
+    "gulp": "^4.0.2",
+    "gulp-csso": "^3.0.1",
+    "gulp-postcss": "^8.0.0",
+    "gulp-sass": "^4.0.2",
+    "node-sass": "^4.13.0",
+    "tailwindcss": "^1.1.3"
+  }
+}
