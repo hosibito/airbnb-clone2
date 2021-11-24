@@ -134,6 +134,14 @@ class Room(core_models.TimeStampedModel):
             return round(all_rating / len(all_reviews), 2)
         return 0
 
+    def first_photo(self):  # Room model에 photo가 없다..
+        # print(self.photo_set.all()[:1])  # <QuerySet [<Photo: 장나라1>]>
+        (photo,) = self.photo_set.all()[:1]
+        # print(photo)  # 장나라1
+        # print(photo.file)  # room_photos/995C763359E5B41530.jpg
+        # print(photo.file.url)  # /media/room_photos/995C763359E5B41530.jpg
+        return photo.file.url
+
 
 """  노트 4.1 참조
     https://github.com/SmileyChris/django-countries
