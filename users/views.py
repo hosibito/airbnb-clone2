@@ -32,25 +32,6 @@ class LoginView(FormView):
     # 개념정리 꼭 확인할것!!! 그냥 이걸보면.. 너무. 간략화되어 이해하기 힘들다.
 
 
-class LoginView_old(View):
-    def get(self, request):
-        form = user_forms.LoginForm(initial={"email": "test@test.com"})  # 기본값
-        return render(request, "users/login.html", {"form": form})
-
-    def post(self, request):
-        form = user_forms.LoginForm(request.POST)  # 입력된값 저장. bounced form
-        # print(form.is_valid())  # True
-        if form.is_valid():
-            # print(form.cleaned_data)  # {'email': 'lalalalal', 'password': 'lalala'}
-            email = form.cleaned_data.get("email")
-            password = form.cleaned_data.get("password")
-            user = authenticate(request, username=email, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect(reverse("core:home"))
-        return render(request, "users/login.html", {"form": form})
-
-
 def log_out(request):
     logout(request)
     return redirect(reverse("core:home"))
@@ -61,21 +42,34 @@ class SignUpView(FormView):
     form_class = user_forms.SignUpForm
     success_url = reverse_lazy("core:home")
 
-    initial = {  # 폼에 들어갈 기본 데이터를 미리 입력
-        "first_name": "Nicoas",
-        "last_name": "Serr",
-        "email": "hosibito@naver.com",
-    }
+    # initial = {  # 폼에 들어갈 기본 데이터를 미리 입력
+    #     "first_name": "Nicoas",
+    #     "last_name": "Serr",
+    #     "email": "itn@las.com",
+    # }
 
     def form_valid(self, form):
         form.save()
-        email = form.cleaned_data.get("email")
-        password = form.cleaned_data.get("password")
-        user = authenticate(self.request, username=email, password=password)
+        username = form.cleaned_data.get("username")
+        password = form.cleaned_data.get("password1")
+        user = authenticate(self.request, username=username, password=password)
+        print(user)
         if user is not None:
+            user.email = username
+            user.save()
             login(self.request, user)
+
         user.verify_email()  # 모델안의 이메일 보내는 함수 호출
         return super().form_valid(form)
+        """
+        아마도!!
+        form.save() 가 폼을 기반으로 이미 유저를 만드는게 아닌가 싶다.
+        그러니 form이 email 이었을때 username가 비어있는 유저가 생성된게 설명됨..
+        그러고 유저명으로 검색하니 None 이넘어오고 메일이 안보내진다..
+
+        좀더 파고들어볼것.. 유저가 없으면 만들어서. user.verify_email() 보내고 있다...
+        다만 만드는게 좀 이상하다.. form 입력된걸 기반으로 만들어서. 다시 돌린다는 느낌이다.
+        """
 
 
 def complete_verification(request, key):
@@ -270,3 +264,55 @@ def kakao_callback(request):
             raise KakaoException()
     except KakaoException:
         return redirect(reverse("users:login"))
+
+
+# ############################# 참고 보관용 코드 ##################################################
+
+
+class LoginView_old(View):
+    """
+    로그인 뷰의 기본동작을 파악하기 위한코드.
+    """
+
+    def get(self, request):
+        form = user_forms.LoginForm(initial={"email": "test@test.com"})  # 기본값
+        return render(request, "users/login.html", {"form": form})
+
+    def post(self, request):
+        form = user_forms.LoginForm(request.POST)  # 입력된값 저장. bounced form
+        # print(form.is_valid())  # True
+        if form.is_valid():
+            # print(form.cleaned_data)  # {'email': 'lalalalal', 'password': 'lalala'}
+            email = form.cleaned_data.get("email")
+            password = form.cleaned_data.get("password")
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect(reverse("core:home"))
+        return render(request, "users/login.html", {"form": form})
+
+
+class SignUpView__ModelForm(FormView):
+    """
+    ModelForm 으로 만들어진 폼을 이용할때의 SingnUpView
+    """
+
+    template_name = "users/signup.html"
+    form_class = user_forms.SignUpForm
+    success_url = reverse_lazy("core:home")
+
+    initial = {  # 폼에 들어갈 기본 데이터를 미리 입력
+        "first_name": "Nicoas",
+        "last_name": "Serr",
+        "email": "hosibito@naver.com",
+    }
+
+    def form_valid(self, form):
+        form.save()
+        email = form.cleaned_data.get("email")
+        password = form.cleaned_data.get("password")
+        user = authenticate(self.request, username=email, password=password)
+        if user is not None:
+            login(self.request, user)
+        user.verify_email()  # 모델안의 이메일 보내는 함수 호출
+        return super().form_valid(form)
