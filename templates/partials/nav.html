@@ -1,9 +1,16 @@
-<a href="{% url 'core:home' %}">Nbnb</a>
-<ul>
+<ul class=" flex items-center text-sm font-medium h-full">
     {% if user.is_authenticated %}
-        <li><a href="{% url 'users:logout' %}">Log out</a></li>
+        <li class="nav_link"><a href="{% url 'users:logout' %}">Log out</a></li>
     {% else %}
-        <li><a href="{% url 'users:login' %}">Log in</a></li>
-        <li><a href="{% url 'users:signup' %}">Sign up</a></li>
+        <li class="nav_link"><a href="{% url 'users:login' %}">Log in</a></li>
+        <li class="nav_link"><a href="{% url 'users:signup' %}">Sign up</a></li>              
     {% endif %}
 </ul>
+
+<!-- =================================================================== -->
+{% comment "참고용 코드 보관" %}  
+
+    <li class="ml-8 border-b-2 border-white h-full flex items-center hover:border-gray-600"><a class="py-10 px-5" href="{% url 'users:signup' %}">aaaaa up</a></li>
+
+
+{% endcomment %}
