@@ -1,9 +1,43 @@
-<div>
-    <a href="{% url 'users:github-login' %}" >
-        Continue with Github
+<div class="flex flex-col w-full">
+    <a href="{% url 'users:github-login' %}" 
+        class="btn border-gray-700 text-gray-700 mb-2">
+        <i class="fab fa-github fa-lg mr-4"></i>Continue with Github
     </a>
-    <a href="{% url 'users:kakao-login' %}" >
-        Continue with Kakao
+    <a href="{% url 'users:kakao-login' %}" 
+        class="btn border-yellow-700  text-yellow-800 mb-2 bg-yellow-400">
+        <i class="fas fa-comment fa-lg mr-4"></i>Continue with Kakao
     </a>
 </div> 
 
+<div class="flex items-center w-full my-5">
+    <div class="h-px w-full bg-gray-400"></div>
+    <span class="text-gray-600 font-medium mx-4 text-sm">or</span>
+    <div class="h-px w-full bg-gray-400" ></div>
+</div>
+
+
+<!-- =================================================================== -->
+{% comment "참고용 코드 보관" %}
+    <!-- .btn 부품화 하기전 소셜 로그인코드 -->
+        <div class="flex flex-col w-full">
+            <a href="{% url 'users:github-login' %}" class="w-full border-2 font-medium text-gray-700 mb-2 border-gray-700 text-center rounded-sm py-5">
+                <i class="fab fa-github-alt mr-2 fa-lg"></i> Continue with Github
+            </a>
+            <a href="{% url 'users:kakao-login' %}" class="w-full border font-medium text-yellow-800 mb-2 border-yellow-400 text-center rounded-sm py-5 bg-yellow-400 ">
+                <i class="fas fa-comment mr-2 fa-lg"></i> Continue with Kakao
+            </a>
+        </div> 
+    <!-- ------------------------ -->
+
+    <!-- 꾸미기전 기본 소셜 로그인코드 -->
+        <div>
+            <a href="{% url 'users:github-login' %}" >
+                Continue with Github
+            </a>
+            <a href="{% url 'users:kakao-login' %}" >
+                Continue with Kakao
+            </a>
+        </div> 
+    <!-- ------------------------ -->
+
+{% endcomment %}

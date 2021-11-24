@@ -9,12 +9,61 @@
 
 {% block content %}
 
-    {% include 'partials/social_login.html' %}
+    <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
+        {% include 'partials/social_login.html' %}
+    
+        <form method="POST" action="{% url 'users:login' %}" class="w-full">
+            {% csrf_token %}
+            <input type="email" placeholder="Email" class="mb-3">
+            <input type="password" placeholder="Password" class="mb-3">
+            <button class="btn bg-red-500 text-white">Login</button>
+        </form>
 
-    <form method="POST" action="{% url 'users:login' %}">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button>Login</button>
-    </form>
+        <div class="mt-5">
+            <span class="mr-2">Don't have an account?</span>
+            <a href="{% url 'users:signup' %}" class="text-teal-500 font-medium">Sign up</a>
+        </div>
+    </div>
 
 {% endblock content %} 
+
+
+
+<!-- =================================================================== -->
+{% comment "참고용 코드 보관" %}
+    <!-- {{form.as_p}} 없애기전 코드  -->
+        <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
+            {% include 'partials/social_login.html' %}
+        
+            <form method="POST" action="{% url 'users:login' %}">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button>Login</button>
+            </form>
+        </div>   
+    <!-- ------------------------ -->
+
+    <!-- 꾸미기전 기본 로그인코드 -->
+        {% extends "base.html" %}
+
+        {% block page_title %}
+            Log In
+        {% endblock page_title %}
+
+        {% block search-bar %}
+        {% endblock search-bar %}
+
+        {% block content %}
+
+            {% include 'partials/social_login.html' %}
+
+            <form method="POST" action="{% url 'users:login' %}">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button>Login</button>
+            </form>
+
+        {% endblock content %} 
+    <!-- ------------------------ -->
+
+{% endcomment %}
