@@ -12,12 +12,8 @@
     <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
         {% include 'partials/social_login.html' %}
     
-        <form method="POST" action="{% url 'users:login' %}" class="w-full">
-            {% csrf_token %}
-            <input type="email" placeholder="Email" class="mb-3">
-            <input type="password" placeholder="Password" class="mb-3">
-            <button class="btn bg-red-500 text-white">Login</button>
-        </form>
+        {% include 'mixins/auth/auth_form.html' with form=form cta="Login" %}
+        <!-- #20 MAKE IT ALL BEAUTIFUL Form (부품으로 만들기) 참고 -->
 
         <div class="mt-5">
             <span class="mr-2">Don't have an account?</span>
@@ -31,6 +27,42 @@
 
 <!-- =================================================================== -->
 {% comment "참고용 코드 보관" %}
+    <!-- form 부품화 하기전 코드2  -->
+        <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
+            {% include 'partials/social_login.html' %}
+        
+            <form method="POST" action="{% url 'users:login' %}">
+                {% csrf_token %}
+                {{form.email}}
+                {{form.password}}                
+                <button class="btn bg-red-500 text-white">Login</button>
+            </form>
+
+            <div class="mt-5">
+                <span class="mr-2">Don't have an account?</span>
+                <a href="{% url 'users:signup' %}" class="text-teal-500 font-medium">Sign up</a>
+            </div>
+        </div>
+    <!-- ------------------------ -->
+
+    <!-- form 부품화 하기전 코드1  -->
+        <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
+            {% include 'partials/social_login.html' %}
+        
+            <form method="POST" action="{% url 'users:login' %}" class="w-full">
+                {% csrf_token %}
+                <input type="email" placeholder="Email" class="mb-3">
+                <input type="password" placeholder="Password" class="mb-3">
+                <button class="btn bg-red-500 text-white">Login</button>
+            </form>
+
+            <div class="mt-5">
+                <span class="mr-2">Don't have an account?</span>
+                <a href="{% url 'users:signup' %}" class="text-teal-500 font-medium">Sign up</a>
+            </div>
+        </div>
+    <!-- ------------------------ -->
+
     <!-- {{form.as_p}} 없애기전 코드  -->
         <div class="container sm:w-full md:w-1/2 lg:w-5/12 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">        
             {% include 'partials/social_login.html' %}

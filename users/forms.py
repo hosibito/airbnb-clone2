@@ -31,15 +31,42 @@ class LoginForm(forms.Form):
 """
 
 
-class SignUpForm(UserCreationForm):  # 18.5 참조유저에 관련해서는 유저크리에이션폼을 이용하는게 유리(패스워드 발리데이터)
+class SignUpForm(UserCreationForm):
+    class Meta:
+        model = models.User  # 모델지정
+        fields = ("first_name", "last_name", "username")
+        widgets = {
+            "first_name": forms.TextInput(attrs={"placeholder": "First Name"}),
+            "last_name": forms.TextInput(attrs={"placeholder": "Last Name"}),
+            "username": forms.EmailInput(attrs={"placeholder": "Email Name"}),
+        }
+        error_messages = {
+            "username": {
+                "unique": "같은 이메일의 유저가 이미 존재합니다. ",
+            },
+        }
+
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={"placeholder": "Password"})
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={"placeholder": "Confirm Password"})
+    )
+
+    # username = forms.EmailField(label="Email")
+
+
+# ################## 사용되지 않는 참고용 코드들 ###########################
+
+
+class SignUpForm__3(
+    UserCreationForm
+):  # 18.5 참조유저에 관련해서는 유저크리에이션폼을 이용하는게 유리(패스워드 발리데이터)
     class Meta:
         model = models.User  # 모델지정
         fields = ("first_name", "last_name", "username")
 
     username = forms.EmailField(label="Email")
-
-
-# ################## 사용되지 않는 참고용 코드들 ###########################
 
 
 class SignUpForm__2(forms.ModelForm):  # 15.2~3 모델폼 이용 보편적 사용시 이걸이용함

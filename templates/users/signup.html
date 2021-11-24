@@ -8,9 +8,150 @@
 {% endblock search-bar %}
 
 {% block content %}
-    <form method="POST" action="{% url 'users:signup' %}">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button>Sign up</button>
-    </form>
+    <div class="container lg:w-5/12 md:w-1/2 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">
+        {% include 'partials/social_login.html' %}
+
+        {% include 'mixins/auth/auth_form.html' with form=form cta="Sign up" %}
+        <!-- #20 MAKE IT ALL BEAUTIFUL Form (부품으로 만들기) 참고 -->
+
+        <div class="mt-5">
+            <span class="mr-2">Have an account?</span>
+            <a href="{% url 'users:login' %}" class="text-teal-500 font-medium">Log in</a>
+        </div>
+    </div>
 {% endblock content %}
+
+
+<!-- =================================================================== -->
+{% comment "참고용 코드 보관" %}
+    <!-- form 에러표기 반복작업을 없앰  -->
+        <div class="container lg:w-5/12 md:w-1/2 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">
+            {% include 'partials/social_login.html' %}
+
+            <form method="POST" action="{% url 'users:signup' %}">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        {{error}}
+                    {% endfor %}
+                {% endif %}
+
+                <!--이 부분을 아래쪽 문제점 부분과 비교해서 볼것! -->
+                {% for field in form %}
+                    <div class="input {% if field.errors %}has_error{% endif %}">
+                        {{field}}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button class="btn bg-red-500 text-white">Sign up</button>
+            </form>
+
+            <div class="mt-5">
+                <span class="mr-2">Have an account?</span>
+                <a href="{% url 'users:login' %}" class="text-teal-500 font-medium">Log in</a>
+            </div>
+        </div>
+    <!-- ------------------------ -->
+
+    <!-- form 에러표기 이해 쉽게(꾸며짐)  -->
+        <div class="container lg:w-5/12 md:w-1/2 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">
+            {% include 'partials/social_login.html' %}
+
+            <form method="POST" action="{% url 'users:signup' %}">
+                {% csrf_token %}
+                {% if form.non_field_errors %} <!--항목이 아닌 공통된 에러...-->
+                    {% for error in form.non_field_errors %}
+                        {{error}}
+                    {% endfor %}
+                {% endif %}
+
+                {{form.first_name}}
+                {{form.first_name.errors}}
+                {{form.last_name}}
+                {{form.last_name.errors}}
+                
+                <div class="input {% if form.username.errors %}has_error{% endif %}">
+                    {{form.username}}
+                    {% if form.username %}
+                        {% for error in form.username.errors %}
+                            <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <!--문제점.. 완성된 이곳을 모든 필드에 일일이 똑같이 반복해서 쳐 줘야 한다...-->
+
+                {{form.password1}}
+                {{form.password1.errors}}
+                {{form.password2}}
+                {{form.password2.errors}}
+                <button class="btn bg-red-500 text-white">Sign up</button>
+            </form>
+            <div class="mt-5">
+                <span class="mr-2">Have an account?</span>
+                <a href="{% url 'users:login' %}" class="text-teal-500 font-medium">Log in</a>
+            </div>
+        </div>
+    <!-- ------------------------ -->
+
+    <!-- form 에러표기 기본  -->
+        <div class="container lg:w-5/12 md:w-1/2 xl:w-1/4 mx-auto my-10 flex flex-col items-center border p-6 border-gray-400">
+            {% include 'partials/social_login.html' %}
+
+            <form method="POST" action="{% url 'users:signup' %}">
+                {% csrf_token %}
+                {{form.first_name}}
+                {{form.last_name}}
+                {{form.username}}
+
+                {% if form.errors %}
+                    {% for e in form.errors %}
+                        {{e}}
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.email.errors %}
+                    {% for e in form.email.errors %}
+                        {{e}}
+                    {% endfor %}
+                {% endif %}
+
+                {{form.password1}}
+                {{form.password2}}
+                <button class="btn bg-red-500 text-white">Sign up</button>
+            </form>
+
+            <div class="mt-5">
+                <span class="mr-2">Have an account?</span>
+                <a href="{% url 'users:login' %}" class="text-teal-500 font-medium">Log in</a>
+            </div>
+
+        </div>
+    <!-- ------------------------ -->
+    
+
+    <!-- 꾸미기전 기본 로그인코드 -->
+        {% extends "base.html" %}
+
+        {% block page_title %}
+            Sign Up
+        {% endblock page_title %}
+        
+        {% block search-bar %}
+        {% endblock search-bar %}
+        
+        {% block content %}
+            <form method="POST" action="{% url 'users:signup' %}">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button>Sign up</button>
+            </form>
+        {% endblock content %}    
+    <!-- ------------------------ -->
+
+{% endcomment %}

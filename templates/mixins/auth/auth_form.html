@@ -1,0 +1,52 @@
+<!-- 부품을 쪼개서 완성 -->
+<form method="POST" class="w-full">  
+    <!--html은 기본적으로 특정 액션이 없을경우 같은페이지로 연결되므로 
+        action="{% url 'users:signup' %}" 
+        이 없어도 동작한다. -->
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+        {% endfor %}
+    {% endif %}
+
+    {% for field in form %}
+        {% include 'mixins/auth/form_input.html' with field=field %}
+    {% endfor %}
+
+    <button class="btn bg-red-500 text-white">{{cta}}</button>
+</form> 
+
+
+
+
+<!-- =================================================================== -->
+{% comment "참고용 코드 보관" %}
+ 
+    <!-- Form 자체를 부품화 한다.  -->
+    <form method="POST" class="w-full">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+            {% endfor %}
+        {% endif %}
+
+        {% for field in form %}
+            <div class="input w-full {% if field.errors %}has_error{% endif %}">
+                {{field}}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button class="btn bg-red-500 text-white">{{cta}}</button>
+    </form> 
+
+
+{% endcomment %}
