@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
+from django.contrib import messages
 
 from . import forms as user_forms
 from . import models as user_models
@@ -33,6 +34,7 @@ class LoginView(FormView):
 
 
 def log_out(request):
+    messages.info(request, f"{request.user.username}님 로그아웃 하셧습니다.  ")
     logout(request)
     return redirect(reverse("core:home"))
 
@@ -105,7 +107,8 @@ def github_callback(request):
         code = request.GET.get("code", None)
         if code is not None:
             token_request = requests.post(
-                f"https://github.com/login/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}",
+                f"https://github.com/login/oauth/access_token?client_id={client_id}\
+                    &client_secret={client_secret}&code={code}",
                 headers={"Accept": "application/json"},
             )
             # print(token_request.json())
@@ -114,8 +117,7 @@ def github_callback(request):
             error = token_json.get("error", None)
 
             if error is not None:
-                print("깃허브에서 토큰을 받아오면서 오류가 생겼다")
-                raise GithubException()
+                raise GithubException(f"깃허브 토큰을 받아오며 오류가 생겼습니다 error : {error}")
             else:
                 access_token = token_json.get("access_token")
                 api_request = requests.get(
@@ -131,9 +133,7 @@ def github_callback(request):
                     email = profile_json.get("email", None)
 
                     if email is None:
-                        # 깃허브에서 이메일정보를 못가져온다. 오류처리할것
-                        print("깃허브에서 이메일정보를 못가져온다.")
-                        raise GithubException()
+                        raise GithubException("깃허브 유저 정보에 email이 없습니다. ")
 
                     bio = profile_json.get("bio", None)
                     if bio is None:
@@ -144,8 +144,7 @@ def github_callback(request):
                         # 이미 로그인해 있거나. 가입해있는유저
                         if user.login_method != user_models.User.LOGIN_GITHUB:
                             # 다른방식으로 가입해 있는 유저
-                            print("깃허브가 아닌 다른방식으로 가입해 있는 유저")
-                            raise GithubException()
+                            raise GithubException(f"{user.login_method}로 로그인해 주세요.")
                     except user_models.User.DoesNotExist:
                         # 새로 가입해야할 유저
                         user = user_models.User.objects.create(
@@ -160,13 +159,14 @@ def github_callback(request):
                         user.save()
 
                     login(request, user)
+                    messages.success(request, f"환영합니다. {user.username}님")
                     return redirect(reverse("core:home"))
                 else:
-                    raise GithubException()
+                    raise GithubException("깃허브 유저 정보를 가져오지 못했습니다. ")
         else:
-            raise GithubException()
-    except GithubException:
-        # 에러메시지 포함시킬것
+            raise GithubException("깃허브 에서 code를 받아오지 못했습니다. ")
+    except GithubException as e:
+        messages.error(request, e)
         return redirect(reverse("users:login"))
 
 
@@ -174,7 +174,8 @@ def kakao_login(request):
     REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
     REDIRECT_URI = "http://127.0.0.1:8000/users/login/kakao/callback"
     return redirect(
-        f"https://kauth.kakao.com/oauth/authorize?client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}&response_type=code"
+        f"https://kauth.kakao.com/oauth/authorize?client_id={REST_API_KEY}\
+            &redirect_uri={REDIRECT_URI}&response_type=code"
     )
 
 
@@ -205,7 +206,7 @@ def kakao_callback(request):
             # print(token_json)  # {'access_token': 'I6l9m....', .....
             error = token_json.get("error", None)
             if error is not None:
-                raise KakaoException()
+                raise KakaoException(f"카카오 토큰을 얻어오면서 에러 발생 error:{error}")
             else:
                 access_token = token_json.get("access_token")
                 api_request = requests.get(
@@ -224,15 +225,14 @@ def kakao_callback(request):
 
                     if email is None:
                         # 카카오에서 이메일정보를 못가져온다. 오류처리할것
-                        print("카카오에서 이메일정보를 못가져온다.")
-                        raise KakaoException()
+                        raise KakaoException("카카오에서 이메일정보를 제공하지 않습니다.")
 
                     try:
                         user = user_models.User.objects.get(email=email)
                         # 이미 로그인해 있거나. 가입해있는유저
                         if user.login_method != user_models.User.LOGING_KAKAO:
                             # 다른방식으로 가입해 있는 유저
-                            raise GithubException()
+                            raise KakaoException(f"{user.login_method}로 로그인해 주세요.")
                     except user_models.User.DoesNotExist:
                         # 새로 가입해야할 유저
                         user = user_models.User.objects.create(
@@ -257,12 +257,14 @@ def kakao_callback(request):
                             # 그 데이터를  ContentFile()로 묶어서 파일로 만들어 저장한다.
 
                     login(request, user)
+                    messages.success(request, f"환영합니다. {user.username}님")
                     return redirect(reverse("core:home"))
                 else:
-                    raise GithubException()
+                    raise KakaoException("카카오 프로파일에 ID 가 없습니다. ")
         else:
-            raise KakaoException()
-    except KakaoException:
+            raise KakaoException("카카오에서 code를 받아올수 없습니다. ")
+    except KakaoException as e:
+        messages.error(request, e)
         return redirect(reverse("users:login"))
 
 
