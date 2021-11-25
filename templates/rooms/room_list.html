@@ -49,7 +49,8 @@
 
     {% for room in object_list  %}
         <h3>
-            <a href="{% url 'rooms:detail' room.pk %}">
+            <!-- <a href="{% url 'rooms:detail' room.pk %}"> -->
+            <a href="{{ rooms.get_absolute_url }}">
                 {{room.name}} / ${{room.price}}
             </a>
         </h3>

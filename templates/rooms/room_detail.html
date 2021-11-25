@@ -11,7 +11,8 @@
         <!-- class detailview 일떄는 모델명.XXXX 이거나 object.XXXX 둘다 사용가능하다. -->
     </div>
     <div>
-        <h2>By: {{room.host.username}}
+        <h2>By: <a href="{{ room.host.get_absolute_url }}">{{room.host.username}}</a>
+            
             {% if room.host.superhost %}
                 (superhost)
             {% endif %}

@@ -2,7 +2,7 @@ import os
 import requests
 
 from django.views import View
-from django.views.generic import FormView
+from django.views.generic import FormView, DetailView
 
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
@@ -268,7 +268,32 @@ def kakao_callback(request):
         return redirect(reverse("users:login"))
 
 
+class UserProfileView(DetailView):
+
+    model = user_models.User
+    context_object_name = "user_obj"
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context["hello"] = "Hello!!!!!!!!!!!"
+    #     return context
+
+
 # ############################# 참고 보관용 코드 ##################################################
+
+
+class UserProfileView__(DetailView):
+    """
+    클래스 뷰 에서 context_data 추가하기
+    """
+
+    model = user_models.User
+    context_object_name = "user_obj"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hello"] = "Hello!!!!!!!!!!!"
+        return context
 
 
 class LoginView_old(View):
