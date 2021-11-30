@@ -124,7 +124,7 @@ class Room(core_models.TimeStampedModel):
     def get_absolute_url(self):  # 노트 12 get_absolute_url 참조!
         return reverse("rooms:detail", kwargs={"pk": self.pk})
 
-    def total_rating(self):  # 8.0 참조
+    def get_total_rating(self):  # 8.0 참조
         all_reviews = self.review_set.all()
         all_rating = 0
         if len(all_reviews) > 0:
@@ -134,13 +134,23 @@ class Room(core_models.TimeStampedModel):
             return round(all_rating / len(all_reviews), 2)
         return 0
 
-    def first_photo(self):  # Room model에 photo가 없다..
+    def get_first_photo(self):  # Room model에 photo가 없다..
         # print(self.photo_set.all()[:1])  # <QuerySet [<Photo: 장나라1>]>
         (photo,) = self.photo_set.all()[:1]
         # print(photo)  # 장나라1
         # print(photo.file)  # room_photos/995C763359E5B41530.jpg
         # print(photo.file.url)  # /media/room_photos/995C763359E5B41530.jpg
         return photo.file.url
+
+    def get_next_four_photos(self):
+        photos = self.photo_set.all()[1:5]
+        return photos
+
+    def get_beds(self):  # 복수형 다른해결책 #22.1 pluralize 참고
+        if self.beds == 1:
+            return "1 bed"
+        else:
+            return f"{self.beds} beds"
 
 
 """  노트 4.1 참조
