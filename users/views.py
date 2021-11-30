@@ -3,21 +3,31 @@ import requests
 
 from django.views import View
 from django.views.generic import FormView, DetailView, UpdateView
+from django.contrib.auth.views import PasswordChangeView
 
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 
 from . import forms as user_forms
 from . import models as user_models
+from . import mixins as user_mixins
 
 
-class LoginView(FormView):
+class LoginView(user_mixins.LoggedOutOnlyView, FormView):
     template_name = "users/login.html"
     form_class = user_forms.LoginForm  # () 없음에 주의
-    success_url = reverse_lazy("core:home")  # url을 부를때 생성
+
+    # success_url = reverse_lazy("core:home")  # url을 부를때 생성
+    def get_success_url(self):  # ?next=/users/update-profile/ 처리 21.9 참고
+        next_arg = self.request.GET.get("next")
+        if next_arg is not None:
+            return next_arg
+        else:
+            return reverse("core:home")
 
     def form_valid(self, form):
         email = form.cleaned_data.get("email")
@@ -39,7 +49,7 @@ def log_out(request):
     return redirect(reverse("core:home"))
 
 
-class SignUpView(FormView):
+class SignUpView(user_mixins.LoggedOutOnlyView, FormView):
     template_name = "users/signup.html"
     form_class = user_forms.SignUpForm
     success_url = reverse_lazy("core:home")
@@ -279,7 +289,7 @@ class UserProfileView(DetailView):
     #     return context
 
 
-class UpdateProfileView(UpdateView):
+class UpdateProfileView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
 
     model = user_models.User
     template_name = "users/update_profile.html"
@@ -295,9 +305,17 @@ class UpdateProfileView(UpdateView):
         "currency",
     )
 
+    success_message = "Profile Updated"
+
     def get_object(self, queryset=None):
         self.old_username = self.request.user.username  # 유저이름이 바뀌는지 확인위해
         return self.request.user
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["birthdate"].widget.attrs = {"placeholder": "Birthdate"}
+        form.fields["first_name"].widget.attrs = {"placeholder": "First name"}
+        return form
 
     def form_valid(self, form):
         username = form.cleaned_data.get("username")
@@ -310,6 +328,30 @@ class UpdateProfileView(UpdateView):
             user.verify_email()  # 모델안의 이메일 보내는 함수 호출
 
         return super().form_valid(form)
+
+
+class UpdatePasswordView(
+    user_mixins.LoggedInOnlyView,
+    user_mixins.EmailLoginOnlyView,
+    SuccessMessageMixin,
+    PasswordChangeView,
+):
+
+    template_name = "users/update_password.html"
+
+    success_message = "Password Updated"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["old_password"].widget.attrs = {"placeholder": "Current password"}
+        form.fields["new_password1"].widget.attrs = {"placeholder": "New password"}
+        form.fields["new_password2"].widget.attrs = {
+            "placeholder": "Confirm new password"
+        }
+        return form
+
+    def get_success_url(self):
+        return self.request.user.get_absolute_url()
 
 
 # ############################# 참고 보관용 코드 ##################################################
