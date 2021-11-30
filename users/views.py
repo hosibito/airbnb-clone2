@@ -2,7 +2,7 @@ import os
 import requests
 
 from django.views import View
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView, DetailView, UpdateView
 
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
@@ -55,7 +55,7 @@ class SignUpView(FormView):
         username = form.cleaned_data.get("username")
         password = form.cleaned_data.get("password1")
         user = authenticate(self.request, username=username, password=password)
-        print(user)
+        # print(user)
         if user is not None:
             user.email = username
             user.save()
@@ -277,6 +277,39 @@ class UserProfileView(DetailView):
     #     context = super().get_context_data(**kwargs)
     #     context["hello"] = "Hello!!!!!!!!!!!"
     #     return context
+
+
+class UpdateProfileView(UpdateView):
+
+    model = user_models.User
+    template_name = "users/update_profile.html"
+    fields = (
+        "username",
+        "first_name",
+        "last_name",
+        "avatar",
+        "gender",
+        "bio",
+        "birthdate",
+        "language",
+        "currency",
+    )
+
+    def get_object(self, queryset=None):
+        self.old_username = self.request.user.username  # 유저이름이 바뀌는지 확인위해
+        return self.request.user
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get("username")
+        user = self.object
+        user.email = username
+        user.save()
+
+        if not user.username == self.old_username:  # 유저이름이 바뀌었다면 이메일을 보낸다.
+            user.email_verified = False
+            user.verify_email()  # 모델안의 이메일 보내는 함수 호출
+
+        return super().form_valid(form)
 
 
 # ############################# 참고 보관용 코드 ##################################################

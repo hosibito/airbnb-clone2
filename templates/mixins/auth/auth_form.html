@@ -1,8 +1,9 @@
 <!-- 부품을 쪼개서 완성 -->
-<form method="POST" class="w-full">  
+<form method="POST" class="w-full" enctype="multipart/form-data">
     <!--html은 기본적으로 특정 액션이 없을경우 같은페이지로 연결되므로 
         action="{% url 'users:signup' %}" 
         이 없어도 동작한다. -->
+    <!-- enctype="multipart/form-data" 는 프로필사진이 업데이트 안되서 인코딩타입을 정해준다. -->
     {% csrf_token %}
 
     {% if form.non_field_errors %}
