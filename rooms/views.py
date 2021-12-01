@@ -1,10 +1,12 @@
 from django.utils import timezone
-from django.views.generic import ListView, DetailView, View
+from django.http import Http404
+from django.views.generic import ListView, DetailView, View, UpdateView
 from django.core.paginator import EmptyPage, Paginator
 
 from django.urls import reverse
 from django.shortcuts import redirect, render
 
+from users import mixins as user_mixins
 from . import models, forms
 
 
@@ -129,6 +131,39 @@ class SearchView(View):
             form = forms.SearchForm()  # unbounded form
 
         return render(request, "rooms/search.html", {"form": form})
+
+
+class EditRoomView(user_mixins.LoggedInOnlyView, UpdateView):  # 23.0
+
+    model = models.Room
+    template_name = "rooms/room_edit.html"
+    fields = (
+        "name",
+        "description",
+        "country",
+        "city",
+        "price",
+        "address",
+        "guests",
+        "beds",
+        "bedrooms",
+        "baths",
+        "check_in",
+        "check_out",
+        "instant_book",
+        "room_type",
+        "amenities",
+        "facilities",
+        "house_rules",
+    )
+
+    def get_object(self, queryset=None):  # 23.0 참조( 경로보호)
+        room = super().get_object(queryset=queryset)
+        # print(room)
+        # print(room.pk, self.request.user.pk)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return room
 
 
 """
