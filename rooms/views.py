@@ -1,6 +1,13 @@
 from django.utils import timezone
 from django.http import Http404
-from django.views.generic import ListView, DetailView, View, UpdateView
+from django.views.generic import (
+    ListView,
+    DetailView,
+    View,
+    UpdateView,
+    CreateView,
+    FormView,
+)
 from django.core.paginator import EmptyPage, Paginator
 
 from django.urls import reverse
@@ -199,6 +206,68 @@ def delete_photo(request, room_pk, photo_pk):  # 23.4 참조
         return redirect(reverse("rooms:photos", kwargs={"pk": room_pk}))
     except models.Room.DoesNotExist:
         return redirect(reverse("core:home"))
+
+
+class __AddPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, CreateView):
+    # 23.5 참고
+    model = models.Photo
+    template_name = "rooms/photo_create.html"
+    success_message = "Photo Created"
+    fields = ("caption", "file")
+
+    def form_valid(self, form):
+        photo = form.save(commit=False)
+        # print(self.kwargs.get("pk"))
+        room_pk = self.kwargs.get("pk")
+        room = models.Room.objects.get(pk=room_pk)
+
+        photo.room = room
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        room_pk = self.kwargs.get("pk")
+        return reverse("rooms:photos", kwargs={"pk": room_pk})
+
+    def get(self, request, *args, **kwargs):  # 23.5 참조
+        room_pk = self.kwargs.get("pk")
+        room = models.Room.objects.get(pk=room_pk)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return super().get(request, *args, **kwargs)
+
+    # def get_object(self, queryset=None):
+    #     # 있지만..작동안함.. 왜지?  models.Photo pk값을 기본입력 받지 않아서 아닐까?
+    #     room = super().get_object(queryset=queryset)
+    #     # print(room)
+    #     # print(room.pk, self.request.user.pk)
+    #     if room.host.pk != self.request.user.pk:
+    #         raise Http404()
+    #     return room
+
+
+class AddPhotoView(user_mixins.LoggedInOnlyView, FormView):
+    # 23.5 참고
+    model = models.Photo
+    template_name = "rooms/photo_create.html"
+    form_class = forms.CreatePhotoForm
+    # success_message = "Photo Created" FormView 에는 없다!
+
+    def form_valid(self, form):
+        pk = self.kwargs.get("pk")
+        form.save(pk)
+        messages.success(self.request, "Photo Uploaded")
+        return redirect(reverse("rooms:photos", kwargs={"pk": pk}))
+
+    def get(self, request, *args, **kwargs):  # 23.5 참조
+        room_pk = self.kwargs.get("pk")
+        room = models.Room.objects.get(pk=room_pk)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return self.render_to_response(self.get_context_data())
+
+    # def get_object(self, queryset=None):  # FormView 에는 없다. 작동안함
+    #     pass
 
 
 # 23.4 참조
