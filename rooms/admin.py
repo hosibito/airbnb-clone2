@@ -117,7 +117,7 @@ class PhotoAdmin(admin.ModelAdmin):
 
     """Photo Admin Definition"""
 
-    list_display = ("__str__", "get_thumbnail")
+    list_display = ("pk", "__str__", "get_thumbnail")
 
     def get_thumbnail(self, obj):  # 노트 8.5참조
         # print(obj.file) # room_photos/3612017.jpeg
