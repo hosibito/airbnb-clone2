@@ -4,10 +4,11 @@ from django.views.generic import ListView, DetailView, View, UpdateView
 from django.core.paginator import EmptyPage, Paginator
 
 from django.urls import reverse
-from django.shortcuts import redirect, render, reverse
+from django.shortcuts import redirect, render
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 
 from users import mixins as user_mixins
 from . import models, forms
@@ -198,6 +199,29 @@ def delete_photo(request, room_pk, photo_pk):  # 23.4 참조
         return redirect(reverse("rooms:photos", kwargs={"pk": room_pk}))
     except models.Room.DoesNotExist:
         return redirect(reverse("core:home"))
+
+
+# 23.4 참조
+class EditPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
+
+    model = models.Photo
+    template_name = "rooms/photo_edit.html"
+    pk_url_kwarg = "photo_pk"
+    success_message = "Photo Updated"
+    fields = ("caption",)
+
+    def get_success_url(self):
+        room_pk = self.kwargs.get("room_pk")
+        return reverse("rooms:photos", kwargs={"pk": room_pk})
+
+    def get_object(self, queryset=None):
+        photo = super().get_object(queryset=queryset)
+        # print(photo)
+        # print(photo.room.host.pk)
+        # print(self.request.user.pk)
+        if photo.room.host.pk != self.request.user.pk:
+            raise Http404()
+        return photo
 
 
 """
