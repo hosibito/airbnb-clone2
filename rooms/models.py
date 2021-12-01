@@ -135,12 +135,17 @@ class Room(core_models.TimeStampedModel):
         return 0
 
     def get_first_photo(self):  # Room model에 photo가 없다..
-        # print(self.photo_set.all()[:1])  # <QuerySet [<Photo: 장나라1>]>
-        (photo,) = self.photo_set.all()[:1]
-        # print(photo)  # 장나라1
-        # print(photo.file)  # room_photos/995C763359E5B41530.jpg
-        # print(photo.file.url)  # /media/room_photos/995C763359E5B41530.jpg
-        return photo.file.url
+        # # print(self.photo_set.all()[:1])  # <QuerySet [<Photo: 장나라1>]>
+        # (photo,) = self.photo_set.all()[:1]
+        # # print(photo)  # 장나라1
+        # # print(photo.file)  # room_photos/995C763359E5B41530.jpg
+        # # print(photo.file.url)  # /media/room_photos/995C763359E5B41530.jpg
+        # return photo.file.url
+        try:
+            (photo,) = self.photo_set.all()[:1]
+            return photo.file.url
+        except ValueError:
+            return None
 
     def get_next_four_photos(self):
         photos = self.photo_set.all()[1:5]

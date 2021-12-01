@@ -1,3 +1,4 @@
+from django import forms
 from django.utils import timezone
 from django.http import Http404
 from django.views.generic import (
@@ -18,7 +19,8 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 
 from users import mixins as user_mixins
-from . import models, forms
+from . import models
+from . import forms as rooms_forms
 
 
 class HomeView(ListView):
@@ -57,7 +59,7 @@ class SearchView(View):
         country = request.GET.get("country")
 
         if country:
-            form = forms.SearchForm(request.GET)
+            form = rooms_forms.SearchForm(request.GET)
             # 입력된 정보를 기억한다. bounded form 이 되어 데이터 무결성 검사를 하게된다.
 
             if form.is_valid():  # 폼 데이터가 무결성인지 알려준다.
@@ -139,7 +141,7 @@ class SearchView(View):
                     return redirect(reverse("core:home"))
 
         else:
-            form = forms.SearchForm()  # unbounded form
+            form = rooms_forms.SearchForm()  # unbounded form
 
         return render(request, "rooms/search.html", {"form": form})
 
@@ -208,8 +210,54 @@ def delete_photo(request, room_pk, photo_pk):  # 23.4 참조
         return redirect(reverse("core:home"))
 
 
+# 23.4 참조
+class EditPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
+
+    model = models.Photo
+    template_name = "rooms/photo_edit.html"
+    pk_url_kwarg = "photo_pk"
+    success_message = "Photo Updated"
+    fields = ("caption",)
+
+    def get_success_url(self):
+        room_pk = self.kwargs.get("room_pk")
+        return reverse("rooms:photos", kwargs={"pk": room_pk})
+
+    def get_object(self, queryset=None):
+        photo = super().get_object(queryset=queryset)
+        # print(photo)
+        # print(photo.room.host.pk)
+        # print(self.request.user.pk)
+        if photo.room.host.pk != self.request.user.pk:
+            raise Http404()
+        return photo
+
+
+# 23.5 참고
+class AddPhotoView(user_mixins.LoggedInOnlyView, FormView):
+    template_name = "rooms/photo_create.html"
+    form_class = rooms_forms.CreatePhotoForm
+    # success_message = "Photo Created" FormView 에는 없다!
+
+    def form_valid(self, form):
+        pk = self.kwargs.get("pk")
+        form.save(pk)
+        messages.success(self.request, "Photo Uploaded")
+        return redirect(reverse("rooms:photos", kwargs={"pk": pk}))
+
+    def get(self, request, *args, **kwargs):  # 23.5 참조
+        room_pk = self.kwargs.get("pk")
+        room = models.Room.objects.get(pk=room_pk)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return self.render_to_response(self.get_context_data())
+
+    # def get_object(self, queryset=None):  # FormView 에는 없다. 작동안함
+    #     pass
+
+
+# 23.5 참고
 class __AddPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, CreateView):
-    # 23.5 참고
     model = models.Photo
     template_name = "rooms/photo_create.html"
     success_message = "Photo Created"
@@ -246,51 +294,68 @@ class __AddPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, CreateVi
     #     return room
 
 
-class AddPhotoView(user_mixins.LoggedInOnlyView, FormView):
-    # 23.5 참고
-    model = models.Photo
-    template_name = "rooms/photo_create.html"
-    form_class = forms.CreatePhotoForm
-    # success_message = "Photo Created" FormView 에는 없다!
+# 23.8  참조
+class CreateRoomView(user_mixins.LoggedInOnlyView, FormView):
+
+    form_class = rooms_forms.CreateRoomForm
+    template_name = "rooms/room_create.html"
 
     def form_valid(self, form):
-        pk = self.kwargs.get("pk")
-        form.save(pk)
-        messages.success(self.request, "Photo Uploaded")
-        return redirect(reverse("rooms:photos", kwargs={"pk": pk}))
-
-    def get(self, request, *args, **kwargs):  # 23.5 참조
-        room_pk = self.kwargs.get("pk")
-        room = models.Room.objects.get(pk=room_pk)
-        if room.host.pk != self.request.user.pk:
-            raise Http404()
-        return self.render_to_response(self.get_context_data())
-
-    # def get_object(self, queryset=None):  # FormView 에는 없다. 작동안함
-    #     pass
+        room = form.save()
+        room.host = self.request.user
+        room.save()
+        form.save_m2m()
+        messages.success(self.request, "Room Uploaded")
+        return redirect(reverse("rooms:detail", kwargs={"pk": room.pk}))
 
 
-# 23.4 참조
-class EditPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
+# 23.8  참조
+class __CreateRoomView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, CreateView):
+    model = models.Room
+    template_name = "rooms/room_create.html"
+    success_message = "Room Uploaded"
+    fields = (
+        "name",
+        "description",
+        "country",
+        "city",
+        "price",
+        "address",
+        "guests",
+        "beds",
+        "bedrooms",
+        "baths",
+        "check_in",
+        "check_out",
+        "instant_book",
+        "room_type",
+        "amenities",
+        "facilities",
+        "house_rules",
+    )
 
-    model = models.Photo
-    template_name = "rooms/photo_edit.html"
-    pk_url_kwarg = "photo_pk"
-    success_message = "Photo Updated"
-    fields = ("caption",)
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        form.fields["check_in"].widget = forms.TimeInput(
+            attrs={"type": "time"}, format="%H:%M"
+        )
+        form.fields["check_out"].widget = forms.TimeInput(
+            attrs={"type": "time"}, format="%H:%M"
+        )
+
+        return form
+
+    def form_valid(self, form):
+        room = form.save(commit=False)
+        room.host = self.request.user
+        room.save()
+        self.room_pk = room.pk
+        return super().form_valid(form)
 
     def get_success_url(self):
-        room_pk = self.kwargs.get("room_pk")
-        return reverse("rooms:photos", kwargs={"pk": room_pk})
-
-    def get_object(self, queryset=None):
-        photo = super().get_object(queryset=queryset)
-        # print(photo)
-        # print(photo.room.host.pk)
-        # print(self.request.user.pk)
-        if photo.room.host.pk != self.request.user.pk:
-            raise Http404()
-        return photo
+        room_pk = self.room_pk
+        return reverse("rooms:detail", kwargs={"pk": room_pk})
 
 
 """
