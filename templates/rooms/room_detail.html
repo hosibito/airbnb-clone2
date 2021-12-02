@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load is_booked %}
+
 {% block page_title %}
     {{room.name}}
 {% endblock page_title %}
@@ -91,6 +93,38 @@
         <div class="w-1/3">
             {% if room.host == user %}
                 <a href="{% url 'rooms:edit' room.pk %}" class="btn-link block">Edit Room</a>
+            {% else %}       
+
+            {{request.session.is_hosting}}
+                {% if not request.session.is_hosting %}                  
+                    {% for calendar in room.get_calendars %}
+                        <div class="mb-20">
+                            <span class="text-center font-semibold text-lg block mb-8">{{calendar.get_month}} / {{calendar.year}}</span>
+                            <div class="grid grid-cols-7 gap-2 text-center font-medium mb-4">
+                                {% for day in calendar.day_names  %}
+                                    <span>{{day}}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="grid grid-cols-7 gap-2 text-center">
+                                {% for day in calendar.get_days_only  %}
+                                    {% is_booked room day as is_booked_bool %}
+                                    {% if day.number != 0 %}
+                                        {% if day.past %}
+                                            <span class="cal-number bg-gray-200 text-gray-400">{{day}}</span>
+                                        {% elif is_booked_bool %}
+                                            <span class="cal-number bg-gray-200 text-gray-500 line-through">{{day}}</span>
+                                        {% else %}
+                                            <span class="cal-number bg-gray-200 text-gray-700 hover:bg-teal-400 hover:text-white hover:font-medium">{{day}}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span></span>
+                                    {% endif %}
+
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
         </div>
     </div>

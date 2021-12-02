@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 
 from django.urls import reverse
@@ -5,9 +6,9 @@ from django_countries.fields import CountryField
 
 from core import models as core_models
 
-# from users import models as user_models
+from cal import Calendar
 
-# Create your models here.
+# from users import models as user_models
 
 
 class AbstractItem(core_models.TimeStampedModel):  # 노트 4 or 하단 참조
@@ -151,7 +152,18 @@ class Room(core_models.TimeStampedModel):
         photos = self.photo_set.all()[1:5]
         return photos
 
-    def get_beds(self):  # 복수형 다른해결책 #22.1 pluralize 참고
+    def get_calendars(self):
+        now = timezone.now()
+        this_year = now.year
+        this_month = now.month
+        next_month = this_month + 1
+        if this_month == 12:
+            next_month = 1
+        this_month_cal = Calendar(this_year, this_month)
+        next_month_cal = Calendar(this_year, next_month)
+        return [this_month_cal, next_month_cal]
+
+    def get_beds(self):  # 이건 사용안함 복수형 다른해결책 #22.1 pluralize 참고
         if self.beds == 1:
             return "1 bed"
         else:

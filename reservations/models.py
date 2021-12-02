@@ -1,7 +1,22 @@
+import datetime
+
 from django.db import models
 from django.utils import timezone  # 8.1
 
 from core import models as core_models
+
+
+class BookedDay(core_models.TimeStampedModel):
+
+    day = models.DateField()
+    reservation = models.ForeignKey("Reservation", on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Booked Day"
+        verbose_name_plural = "Booked Days"
+
+    def __str__(self):
+        return str(self.day)
 
 
 class Reservation(core_models.TimeStampedModel):
@@ -33,7 +48,7 @@ class Reservation(core_models.TimeStampedModel):
     # )
 
     def __str__(self):  # 5.2
-        return f"{self.room} - {self.check_in}"
+        return f"{self.room} : {self.check_in} ~ {self.check_out}"
 
     def in_progress(self):
         now = timezone.now().date()
@@ -46,6 +61,24 @@ class Reservation(core_models.TimeStampedModel):
         return now > self.check_out
 
     is_finished.boolean = True  # x 기호로 표시
+
+    def save(self, *args, **kwargs):  # 24.5 참조
+        if self.pk is None:
+            start = self.check_in
+            end = self.check_out
+            difference = end - start
+            existing_booked_day = BookedDay.objects.filter(
+                day__range=(start, end)
+            ).exists()
+
+            if not existing_booked_day:
+                super().save(*args, **kwargs)
+                for i in range(difference.days + 1):
+                    day = start + datetime.timedelta(days=i)
+                    BookedDay.objects.create(day=day, reservation=self)
+                return
+
+        return super().save(*args, **kwargs)
 
     """  5.2
         def __str__(self) 을 정의해주는이유
