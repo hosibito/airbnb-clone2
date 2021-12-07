@@ -48,8 +48,6 @@ class Reservation(core_models.TimeStampedModel):
     #     "rooms.Room", related_name="reservations", on_delete=models.CASCADE
     # )
 
-    objects = reservation_managers.CustomReservationManager()  # 24.10 참고
-
     def __str__(self):  # 5.2
         return f"{self.room} : {self.check_in} ~ {self.check_out}"
 
@@ -61,7 +59,11 @@ class Reservation(core_models.TimeStampedModel):
 
     def is_finished(self):
         now = timezone.now().date()
-        return now > self.check_out
+        # return now > self.check_out
+        is_finished = now > self.check_out
+        if is_finished:
+            BookedDay.objects.filter(reservation=self).delete()
+        return is_finished
 
     is_finished.boolean = True  # x 기호로 표시
 

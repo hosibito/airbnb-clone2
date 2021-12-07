@@ -1,4 +1,5 @@
 from django.db import models
+from . import managers
 
 """
 모든곳에 공통으로 쓰일 모델 
@@ -13,6 +14,8 @@ class TimeStampedModel(models.Model):
 
     create = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
+
+    objects = managers.CustomModelManager()  # 24.10
 
     class Meta:
         abstract = True

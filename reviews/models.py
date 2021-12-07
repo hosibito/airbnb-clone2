@@ -39,6 +39,9 @@ class Review(core_models.TimeStampedModel):
 
     rating_average.short_description = "평점평균"
 
+    class Meta:
+        ordering = ("-create",)
+
 
 """  5.1 
     ForeignKey 에 정의된것을 {self.room.name} : {self.user.username} 식으로 불러올수 있다.
