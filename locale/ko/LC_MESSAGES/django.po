@@ -1,0 +1,100 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-07 21:05+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\templates\base.html:25
+msgid "Search By City"
+msgstr "도시명으로 검색"
+
+#: .\templates\partials\footer.html:5
+msgid "Please don't copy us."
+msgstr "무단복제는 금지됩니다."
+
+#: .\templates\partials\footer.html:8
+msgid "All rights reserved"
+msgstr "소유합니다."
+
+#: .\templates\partials\footer.html:16 .\users\models.py:34
+msgid "English"
+msgstr "영어"
+
+#: .\templates\partials\footer.html:20 .\users\models.py:35
+msgid "Korean"
+msgstr "한국어"
+
+#: .\templates\rooms\room_list.html:32
+#, python-format
+msgid "Page %(current_page)s of %(total_pages)s"
+msgstr "전체 %(total_pages)s중 %(current_page)s페이지 "
+
+#: .\users\mixins.py:9
+msgid "Page not found"
+msgstr "페이지를 찾을수 없습니다."
+
+#: .\users\mixins.py:15 .\users\mixins.py:28
+msgid "Can't go there"
+msgstr "거기에 못갑니다."
+
+#: .\users\models.py:25
+msgid "Male"
+msgstr "남자"
+
+#: .\users\models.py:26
+msgid "Female"
+msgstr "여자"
+
+#: .\users\models.py:27
+msgid "Other"
+msgstr "기타"
+
+#: .\users\models.py:51
+msgid "Email"
+msgstr "이메일"
+
+#: .\users\models.py:52
+msgid "Github"
+msgstr "깃허브"
+
+#: .\users\models.py:53
+msgid "Kakao"
+msgstr "카카오"
+
+#: .\users\models.py:58
+msgid "gender"
+msgstr "성별"
+
+#: .\users\models.py:60
+msgid "bio"
+msgstr "설명"
+
+#: .\users\models.py:61
+msgid "birthdate"
+msgstr "생일"
+
+#: .\users\models.py:63
+msgid "language"
+msgstr "언어"
+
+#: .\users\models.py:70
+msgid "currency"
+msgstr "통화"
+
+#: .\users\models.py:96
+msgid "Verify Airbnb Account"
+msgstr "에어비엔비 유저확인"
