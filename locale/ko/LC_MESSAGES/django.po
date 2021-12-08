@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-07 21:05+0900\n"
+"POT-Creation-Date: 2021-12-08 14:43+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,13 +30,55 @@ msgstr "무단복제는 금지됩니다."
 msgid "All rights reserved"
 msgstr "소유합니다."
 
-#: .\templates\partials\footer.html:16 .\users\models.py:34
+#: .\templates\partials\footer.html:17 .\users\models.py:34
 msgid "English"
 msgstr "영어"
 
-#: .\templates\partials\footer.html:20 .\users\models.py:35
+#: .\templates\partials\footer.html:21 .\users\models.py:35
 msgid "Korean"
 msgstr "한국어"
+
+#: .\templates\partials\nav.html:7
+msgid "Stop hosting"
+msgstr "호스팅모드 종료"
+
+#: .\templates\partials\nav.html:9
+msgid "Start hosting"
+msgstr "호스팅모드 시작"
+
+#: .\templates\partials\nav.html:15
+msgid "Create Room"
+msgstr "새로운 방 등록"
+
+#: .\templates\partials\nav.html:18
+msgid "Favs"
+msgstr "즐겨찾기"
+
+#: .\templates\partials\nav.html:19
+msgid "Profile"
+msgstr "프로필"
+
+#: .\templates\partials\nav.html:20
+msgid "Log out"
+msgstr "로그아웃"
+
+#: .\templates\partials\nav.html:22
+msgid "Log in"
+msgstr "로그인"
+
+#: .\templates\partials\nav.html:23
+msgid "Sign up"
+msgstr "회원가입"
+
+#: .\templates\rooms\room_detail.html:37
+#, fuzzy
+#| msgid "Save to Favourites"
+msgid "Remove from Favourites"
+msgstr "즐겨찾기에 등록"
+
+#: .\templates\rooms\room_detail.html:42
+msgid "Save to Favourites"
+msgstr "즐겨찾기에 등록"
 
 #: .\templates\rooms\room_list.html:32
 #, python-format
