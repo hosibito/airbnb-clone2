@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager
 from django.db import models
 from django.urls import reverse
 
@@ -13,6 +14,10 @@ from django.template.loader import render_to_string
 from core import managers as core_managers
 
 # Create your models here.
+
+
+class CustomUserManager(UserManager):
+    pass
 
 
 class User(AbstractUser):
@@ -84,7 +89,8 @@ class User(AbstractUser):
         max_length=50, choices=LOGIN_CHOICES, default=LOGIN_EMAIL
     )
 
-    objects = core_managers.CustomModelManager()
+    objects = core_managers.CustomUserManager()
+    # objects = CustomUserManager()
 
     def get_absolute_url(self):
         return reverse("users:profile", kwargs={"pk": self.pk})
